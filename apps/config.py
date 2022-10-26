@@ -1,8 +1,3 @@
-# -*- encoding: utf-8 -*-
-"""
-Copyright (c) 2019 - present AppSeed.us
-"""
-
 import os
 
 class Config(object):
@@ -15,11 +10,11 @@ class Config(object):
 
     # This will create a file in <app> FOLDER
     SQLALCHEMY_DATABASE_URI = 'sqlite:///' + os.path.join(basedir, 'db.sqlite3')
-    SQLALCHEMY_TRACK_MODIFICATIONS = False 
+    SQLALCHEMY_TRACK_MODIFICATIONS = False
 
     # Assets Management
-    ASSETS_ROOT = os.getenv('ASSETS_ROOT', '/static/assets')    
-    
+    ASSETS_ROOT = os.getenv('ASSETS_ROOT', '/static/assets')
+
 class ProductionConfig(Config):
     DEBUG = False
 
@@ -36,7 +31,7 @@ class ProductionConfig(Config):
         os.getenv('DB_HOST'     , 'localhost'),
         os.getenv('DB_PORT'     , 3306),
         os.getenv('DB_NAME'     , 'appseed_db')
-    ) 
+    )
 
 class DebugConfig(Config):
     DEBUG = True

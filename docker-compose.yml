@@ -13,13 +13,24 @@ services:
     restart: always
     image: "nginx:latest"
     ports:
-      - "80:80"
+      - 80:80
     volumes:
       - ./nginx:/etc/nginx/conf.d
     networks:
       - web_network
     depends_on:
       - appseed-app
+  mongo:
+    container_name: mongo
+    restart: always
+    image: mongo
+    ports:
+      - 27017:27017
+    volumes:
+      - ./db/mongo:/data/db
+      # - mongod.conf:/etc/mongod.conf
+    networks:
+      - web_network
 networks:
   db_network:
     driver: bridge

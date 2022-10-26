@@ -1,9 +1,9 @@
 		<!-- Sidebar -->
-		<div class="sidebar sidebar-style-2" data-background-color="dark2">			
+		<div class="sidebar sidebar-style-2" data-background-color="dark2">
 			<div class="sidebar-wrapper scrollbar scrollbar-inner">
 				<div class="sidebar-content">
 
-				{% if current_user.is_authenticated %}	
+				{% if current_user.is_authenticated %}
 					<div class="user">
 						<div class="avatar-sm float-left mr-2">
 							<img src="/static/assets/img/profile.jpg" alt="..." class="avatar-img rounded-circle">
@@ -288,25 +288,11 @@
 								</ul>
 							</div>
 						</li>
-						<li class="mx-4 mt-2">
-                            <a target="_blank"
-                               href="https://appseed.us/admin-dashboards/flask-dashboard-atlantis-dark-pro" 
-                               class="btn btn-danger btn-block">
-                                <span class="btn-label mr-2"> <i class="fa fa-rocket"></i> </span>PRO Version</a> 
-						</li>
 					</ul>
 				{% else %}
-					<ul class="nav nav-primary">
-						<li class="mx-4 mt-2">
-                            <a target="_blank"
-                               href="https://appseed.us/admin-dashboards/flask-dashboard-atlantis-dark-pro" 
-                               class="btn btn-danger btn-block">
-                                <span class="btn-label mr-2"> <i class="fa fa-rocket"></i> </span>PRO Version</a> 
-						</li>
-					</ul>
-				{% endif %}	
+          
+				{% endif %}
 				</div>
 			</div>
 		</div>
         <!-- End Sidebar -->
-        
