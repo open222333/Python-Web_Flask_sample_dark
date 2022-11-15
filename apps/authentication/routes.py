@@ -5,12 +5,12 @@ from flask_login import (
     logout_user
 )
 
-from apps import db, login_manager
+from apps import login_manager
 from apps.authentication import blueprint
 from apps.authentication.forms import LoginForm, CreateAccountForm
 from apps.authentication.models import Users
 
-from apps.authentication.util import verify_pass
+from apps.authentication.util import verify_pass, hash_pass
 
 
 @blueprint.route('/')
@@ -30,7 +30,7 @@ def login():
         password = request.form['password']
 
         # Locate user
-        user = Users.query.filter_by(username=username).first()
+        user = Users.objects(username=username).first()
 
         # Check the password
         if user and verify_pass(password, user.password):
@@ -39,13 +39,17 @@ def login():
             return redirect(url_for('authentication_blueprint.route_default'))
 
         # Something (user or pass) is not ok
-        return render_template('accounts/login.html',
-                               msg='Wrong user or password',
-                               form=login_form)
+        return render_template(
+            'accounts/login.html',
+            msg='Wrong user or password',
+            form=login_form
+        )
 
     if not current_user.is_authenticated:
-        return render_template('accounts/login.html',
-                               form=login_form)
+        return render_template(
+            'accounts/login.html',
+            form=login_form
+        )
     return redirect(url_for('home_blueprint.index'))
 
 
@@ -57,8 +61,9 @@ def register():
         username = request.form['username']
         email = request.form['email']
 
-        # Check usename exists
-        user = Users.query.filter_by(username=username).first()
+        # Check usename exists 檢查使用者名稱是否已存在
+        # user = Users.query.filter_by(username=username).first()
+        user = Users.objects(username=username).first()
         if user:
             return render_template(
                 'accounts/register.html',
@@ -67,8 +72,8 @@ def register():
                 form=create_account_form
             )
 
-        # Check email exists
-        user = Users.query.filter_by(email=email).first()
+        # Check email exists 檢查郵箱是否已存在
+        user = Users.objects(email=email).first()
         if user:
             return render_template(
                 'accounts/register.html',
@@ -77,10 +82,12 @@ def register():
                 form=create_account_form
             )
 
-        # else we can create the user
-        user = Users(**request.form)
-        db.session.add(user)
-        db.session.commit()
+        # else we can create the user 創建使用者
+        user = Users(
+            username=request.form['username'],
+            email=request.form['email'],
+            password=hash_pass(request.form['password'])
+        ).save()
 
         # Delete user from session
         logout_user()

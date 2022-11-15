@@ -2,14 +2,17 @@ version: '3'
 services:
   appseed-app:
     container_name: appseed_app
+    hostname: appseed_app
     restart: always
     env_file: .env
     build: .
+    command: bash -c 'gunicorn --config gunicorn-cfg.py run:app'
     networks:
       - db_network
       - web_network
   nginx:
     container_name: nginx
+    hostname: nginx
     restart: always
     image: "nginx:latest"
     ports:
@@ -22,6 +25,7 @@ services:
       - appseed-app
   mongo:
     container_name: mongo
+    hostname: mongo
     restart: always
     image: mongo
     ports:
@@ -31,6 +35,14 @@ services:
       # - mongod.conf:/etc/mongod.conf
     networks:
       - web_network
+  # redis:
+  #   container_name: redis
+  #   hostname: redis
+  #   image: redis
+  #   ports:
+  #     - 6379:6379
+  #   networks:
+  #     - web_network
 networks:
   db_network:
     driver: bridge

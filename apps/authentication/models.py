@@ -1,70 +1,65 @@
 from flask_login import UserMixin
-from apps import sqlalchemy, login_manager, mongo
-from apps.authentication.util import hash_pass
+from apps import login_manager, mongo
 from datetime import datetime
-
-
-### Sql
-# class Users(sqlalchemy.Model, UserMixin):
-
-#     __tablename__ = 'Users'
-
-#     id = sqlalchemy.Column(sqlalchemy.Integer, primary_key=True)
-#     username = sqlalchemy.Column(sqlalchemy.String(64), unique=True)
-#     email = sqlalchemy.Column(sqlalchemy.String(64), unique=True)
-#     password = sqlalchemy.Column(sqlalchemy.LargeBinary)
-
-#     def __init__(self, **kwargs):
-#         for property, value in kwargs.items():
-#             # depending on whether value is an iterable or not, we must
-#             # unpack it's value (when **kwargs is request.form, some values
-#             # will be a 1-element list)
-#             if hasattr(value, '__iter__') and not isinstance(value, str):
-#                 # the ,= unpack of a singleton fails PEP8 (travis flake8 test)
-#                 value = value[0]
-
-#             if property == 'password':
-#                 value = hash_pass(value)  # we need bytes here (not plain str)
-
-#             setattr(self, property, value)
-
-#     def __repr__(self):
-#         return str(self.username)
 
 
 class Users(mongo.Document, UserMixin):
 
-    id = mongo.IntField(primary_key=True)
     username = mongo.StringField(required=True, unique=True)
     email = mongo.StringField(unique=True)
-    password = mongo.StringField(required=True)
-    create_date = mongo.DateTimeField()
+    password = mongo.BinaryField(required=True)
+    role = mongo.StringField(default='user')
+    creation_date = mongo.DateTimeField()
     modified_date = mongo.DateTimeField(default=datetime.now())
 
-    def __init__(self, **kwargs):
-        for property, value in kwargs.items():
+    meta = {
+        'indexes': [
+            'username',
+            'email',
+            'role',
+            'creation_date',
+            'modified_date'
+        ]
+    }
 
-            if hasattr(value, '__iter__') and not isinstance(value, str):
-                # the ,= unpack of a singleton fails PEP8 (travis flake8 test)
-                value = value[0]
+    def save(self, **kwargs):
+        if not self.creation_date:
+            self.creation_date = datetime.now()
+        self.modified_date = datetime.now()
+        return super(Users, self).save(**kwargs)
 
-            if property == 'password':
-                value = hash_pass(value)  # we need bytes here (not plain str)
 
-            setattr(self, property, value)
+class Roles(mongo.Document, UserMixin):
 
-    def __repr__(self):
-        return str(self.username)
+    role = mongo.StringField(required=True, unique=True)
+    role_name = mongo.StringField(unique=True)
+    
+    creation_date = mongo.DateTimeField()
+    modified_date = mongo.DateTimeField(default=datetime.now())
+
+    meta = {
+        'indexes': [
+            'role',
+            'creation_date',
+            'modified_date'
+        ]
+    }
+
+    def save(self, **kwargs):
+        if not self.creation_date:
+            self.creation_date = datetime.now()
+        self.modified_date = datetime.now()
+        return super(Users, self).save(**kwargs)
+
 
 
 @login_manager.user_loader
 def user_loader(id):
     return Users.objects(id=id).first()
-    # return Users.query.filter_by(id=id).first()
 
 
 @login_manager.request_loader
 def request_loader(request):
     username = request.form.get('username')
-    user = Users.query.filter_by(username=username).first()
+    user = Users.objects(username=username).first()
     return user if user else None
